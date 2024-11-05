@@ -8,13 +8,13 @@ Typescript
 React Native
 
 ### TODO Checklist
-[x] - Camera
-[ ] - Barcode Scanning
-[ ] - QR Scanning
-[ ] - Liscence Plate Scanning
-[ ] - Information Popup Window
-[ ] - Manual Entry Page
-[ ] - Profile Page
+- [x] - Camera
+- [ ] - Barcode Scanning
+- [ ] - QR Scanning
+- [ ] - Liscence Plate Scanning
+- [ ] - Information Popup Window
+- [ ] - Manual Entry Page
+- [ ] - Profile Page
 
 ## Stretch Goals
-[ ] - Maps Page
+- [ ] - Maps Page
