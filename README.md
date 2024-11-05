@@ -1,13 +1,13 @@
-#Cami
+# Cami
 A camera based car tracker
 
-###Languages
+### Languages
 Typescript
 
-###Framework
+### Framework
 React Native
 
-###TODO Checklist
+### TODO Checklist
 [x] - Camera
 [ ] - Barcode Scanning
 [ ] - QR Scanning
