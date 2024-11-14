@@ -1,8 +1,8 @@
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'; //npx expo install expo-camera
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'; // npx expo install expo-camera
 import { useState, useRef } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, Switch } from 'react-native';
 import { Picker } from '@react-native-picker/picker'; // npm install @react-native-picker/picker
-import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler'; //npx expo install react-native-gesture-handler
+import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler'; // npx expo install react-native-gesture-handler
 
 export default function App() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -33,9 +33,10 @@ export default function App() {
 
   // Handle pinch gesture
   const onPinchEvent = (event: PinchGestureHandlerGestureEvent) => {
-    // Calculate the new scale, limiting the zoom level
-    const newScale = lastScale * event.nativeEvent.scale;
-
+    // Apply a factor to slow down the zoom speed (e.g., 0.5 for half speed)
+    const zoomSpeedFactor = 0.1;
+    const newScale = lastScale * (1 + (event.nativeEvent.scale - 1) * zoomSpeedFactor);
+  
     // Set a limit for scaling (e.g., minimum 1, maximum 3)
     if (newScale >= 1 && newScale <= 3) {
       setScale(newScale);
@@ -53,9 +54,10 @@ export default function App() {
       <View style={styles.cameraContainer}>
         <PinchGestureHandler onGestureEvent={onPinchEvent} onHandlerStateChange={onPinchStateChange}>
           <CameraView 
-            style={[styles.camera, { transform: [{ scale }] }]} 
-            facing={facing} 
-            ref={cameraRef} 
+            style={[styles.camera, { transform: [{ scale }] }]}
+            facing={facing}
+            ref={cameraRef}
+            zoom={scale - 1} // Adjust zoom based on scale (values between 0 and 1 for CameraView)
           />
         </PinchGestureHandler>
       </View>
