@@ -1,8 +1,8 @@
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'; //npx expo install expo-camera
-import { useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, Switch } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; // npm install @react-native-picker/picker
-import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler'; //npx expo install react-native-gesture-handler
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { Picker } from '@react-native-picker/picker';
+import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -33,18 +33,15 @@ export default function App() {
 
   // Handle pinch gesture
   const onPinchEvent = (event: PinchGestureHandlerGestureEvent) => {
-    // Calculate the new scale, limiting the zoom level
     const newScale = lastScale * event.nativeEvent.scale;
-
-    // Set a limit for scaling (e.g., minimum 1, maximum 3)
     if (newScale >= 1 && newScale <= 3) {
       setScale(newScale);
     }
   };
 
   const onPinchStateChange = (event: { nativeEvent: { state: number; }; }) => {
-    if (event.nativeEvent.state === 5) { // 5 indicates the end of the gesture
-      setLastScale(scale); // Update last scale when pinch ends
+    if (event.nativeEvent.state === 5) {
+      setLastScale(scale);
     }
   };
 
@@ -58,10 +55,12 @@ export default function App() {
             ref={cameraRef} 
           />
         </PinchGestureHandler>
+
+        <View style={styles.alignmentFrame} />
       </View>
+      
       <View style={styles.controlContainer}>
         <View style={styles.optionRow}>
-          {/* Military/Rental toggle */}
           <Text style={styles.optionText}>Military</Text>
           <Switch
             value={isMilitary}
@@ -71,18 +70,19 @@ export default function App() {
           />
           <Text style={styles.optionText}>Rental</Text>
         </View>
-        {/* Scan type dropdown */}
+        
         <Picker
           selectedValue={scanType}
           style={styles.dropdown}
           onValueChange={(itemValue) => setScanType(itemValue)}
-          itemStyle={styles.pickerItem} // Add itemStyle for better item height control
+          itemStyle={styles.pickerItem}
         >
           <Picker.Item label="Barcode" value="Barcode" />
           <Picker.Item label="QR Code" value="QRCode" />
           <Picker.Item label="License Plate" value="LicensePlate" />
         </Picker>
       </View>
+      
       <View style={styles.tabContainer}>
         <TouchableOpacity style={styles.tabButton}>
           <Text style={styles.tabText}>Scan</Text>
@@ -112,13 +112,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-    marginTop: 40, // Push down the camera
+    marginTop: 40,
   },
   camera: {
     width: '90%',
     height: '90%',
     borderRadius: 10,
     overflow: 'hidden',
+  },
+  alignmentFrame: {
+    position: 'absolute',
+    top: '30%',
+    left: '10%',
+    width: '80%',
+    height: '30%',
+    borderWidth: 2,
+    borderColor: 'white',
+    borderRadius: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
   },
   controlContainer: {
     flex: 1,
@@ -130,7 +141,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-    marginTop: 10, // Space above the toggle
+    marginTop: 10,
   },
   optionText: {
     color: 'white',
@@ -138,14 +149,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   dropdown: {
-    width: '70%', // Make the picker smaller
-    height: 40, // Adjust height of the picker
+    width: '70%',
+    height: 40,
     color: 'white',
     backgroundColor: '#333',
     borderRadius: 5,
   },
   pickerItem: {
-    height: 40, // Set item height for better control
+    height: 40,
   },
   tabContainer: {
     flexDirection: 'row',
