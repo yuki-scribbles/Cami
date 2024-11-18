@@ -1,20 +1,25 @@
 # Cami
 A camera based car tracker
 
-### Languages
-Typescript
+## Languages
+Typescript, JavaScript
 
-### Framework
+## Framework
 React Native
+
+## Other Technologies
+Expo Go, Firebase
 
 ### TODO Checklist
 - [x] - Camera
 - [ ] - Barcode Scanning
-- [ ] - QR Scanning
+- [x] - QR Scanning
+- [x] - Scanner Focus Indicator
 - [ ] - Liscence Plate Scanning
 - [ ] - Information Popup Window
 - [ ] - Manual Entry Page
 - [ ] - Profile Page
+- [ ] - Firebase Implementation
 
-## Stretch Goals
+### Stretch Goals
 - [ ] - Maps Page
