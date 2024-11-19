@@ -1,18 +1,25 @@
-import { CameraView, CameraType, useCameraPermissions } from 'expo-camera'; // npx expo install expo-camera
-import { useState, useRef } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Switch } from 'react-native';
-import { Picker } from '@react-native-picker/picker'; // npm install @react-native-picker/picker
-import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler'; // npx expo install react-native-gesture-handler
+import React, { useState, useRef, useEffect } from 'react';
+import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { Button, StyleSheet, Text, TouchableOpacity, View, Switch, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [isMilitary, setIsMilitary] = useState(false);
   const [scanType, setScanType] = useState("Barcode");
-  const cameraRef = useRef(null); // Ref for the camera
+  const cameraRef = useRef(null);
 
-  const [scale, setScale] = useState(1); // State to hold the current scale
-  const [lastScale, setLastScale] = useState(1); // State to hold the last scale
+  const [scale, setScale] = useState(1);
+  const [lastScale, setLastScale] = useState(1);
+  const [scanned, setScanned] = useState(true); // Initialize as true to prevent scanning until button press
+
+  useEffect(() => {
+    if (permission === null) {
+      requestPermission();
+    }
+  }, [permission]);
 
   if (!permission) {
     return <View />;
@@ -31,39 +38,61 @@ export default function App() {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   }
 
-  // Handle pinch gesture
   const onPinchEvent = (event: PinchGestureHandlerGestureEvent) => {
-    // Apply a factor to slow down the zoom speed (e.g., 0.5 for half speed)
     const zoomSpeedFactor = 0.1;
     const newScale = lastScale * (1 + (event.nativeEvent.scale - 1) * zoomSpeedFactor);
-  
-    // Set a limit for scaling (e.g., minimum 1, maximum 3)
     if (newScale >= 1 && newScale <= 3) {
       setScale(newScale);
     }
   };
 
-  const onPinchStateChange = (event: { nativeEvent: { state: number; }; }) => {
-    if (event.nativeEvent.state === 5) { // 5 indicates the end of the gesture
-      setLastScale(scale); // Update last scale when pinch ends
+  const onPinchStateChange = (event: { nativeEvent: { state: number } }) => {
+    if (event.nativeEvent.state === 5) {
+      setLastScale(scale);
     }
+  };
+
+  const handleBarcodeScanned = ({ type, data }) => {
+    setScanned(true); // Set scanned to true immediately after a successful scan
+    Alert.alert(
+      "Scanned Data",
+      `Scanned data: ${data} (Type: ${type})`,
+      [
+        {
+          text: "OK",
+          onPress: () => setScanned(true), // Reset scanned state only when alert is dismissed
+        },
+      ]
+    );
   };
 
   return (
     <GestureHandlerRootView style={styles.container}>
       <View style={styles.cameraContainer}>
         <PinchGestureHandler onGestureEvent={onPinchEvent} onHandlerStateChange={onPinchStateChange}>
-          <CameraView 
+          <CameraView
             style={[styles.camera, { transform: [{ scale }] }]}
             facing={facing}
             ref={cameraRef}
-            zoom={scale - 1} // Adjust zoom based on scale (values between 0 and 1 for CameraView)
+            zoom={scale - 1}
+            onBarcodeScanned={scanned ? undefined : handleBarcodeScanned} // Conditionally enable scanning
+            barcodeScannerSettings={{
+              barcodeTypes: ["qr"],
+            }}
           />
         </PinchGestureHandler>
       </View>
+
       <View style={styles.controlContainer}>
+        <Button 
+          title="Scan QR Code" 
+          onPress={() => {
+            setScanType("QRCode"); // Set to QR scanning
+            setScanned(false); // Enable scanning
+          }} 
+        />
+
         <View style={styles.optionRow}>
-          {/* Military/Rental toggle */}
           <Text style={styles.optionText}>Military</Text>
           <Switch
             value={isMilitary}
@@ -73,20 +102,21 @@ export default function App() {
           />
           <Text style={styles.optionText}>Rental</Text>
         </View>
-        {/* Scan type dropdown */}
+
         <Picker
           selectedValue={scanType}
           style={styles.dropdown}
           onValueChange={(itemValue) => setScanType(itemValue)}
-          itemStyle={styles.pickerItem} // Add itemStyle for better item height control
+          itemStyle={styles.pickerItem}
         >
           <Picker.Item label="Barcode" value="Barcode" />
           <Picker.Item label="QR Code" value="QRCode" />
           <Picker.Item label="License Plate" value="LicensePlate" />
         </Picker>
       </View>
+
       <View style={styles.tabContainer}>
-        <TouchableOpacity style={styles.tabButton}>
+        <TouchableOpacity style={styles.tabButton} onPress={() => setScanned(false)}>
           <Text style={styles.tabText}>Scan</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton}>
@@ -114,7 +144,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-    marginTop: 40, // Push down the camera
+    marginTop: 40,
   },
   camera: {
     width: '90%',
@@ -132,7 +162,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-    marginTop: 10, // Space above the toggle
+    marginTop: 10,
   },
   optionText: {
     color: 'white',
@@ -140,14 +170,14 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   dropdown: {
-    width: '70%', // Make the picker smaller
-    height: 40, // Adjust height of the picker
+    width: '70%',
+    height: 40,
     color: 'white',
     backgroundColor: '#333',
     borderRadius: 5,
   },
   pickerItem: {
-    height: 40, // Set item height for better control
+    height: 40,
   },
   tabContainer: {
     flexDirection: 'row',
