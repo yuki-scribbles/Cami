@@ -77,7 +77,7 @@ export default function App() {
             zoom={scale - 1}
             onBarcodeScanned={scanned ? undefined : handleBarcodeScanned} // Conditionally enable scanning
             barcodeScannerSettings={{
-              barcodeTypes: scanType === "QRCode" ? ["qr"] : ["barcode"],
+              barcodeTypes: ["qr"],
             }}
           />
         </PinchGestureHandler>
