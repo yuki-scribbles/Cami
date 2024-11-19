@@ -1,5 +1,4 @@
 # Cami
-<<<<<<< QR-Scanner
  A qr based car tracker
 
 Install commands:
@@ -11,7 +10,6 @@ Might need to update expo:
 - npm install expo@latest
 - npm install expo@52
 - npx expo install --fix
-=======
 A camera based car tracker
 
 ## Languages
@@ -36,4 +34,3 @@ Expo Go, Firebase
 
 ### Stretch Goals
 - [ ] - Maps Page
->>>>>>> main
