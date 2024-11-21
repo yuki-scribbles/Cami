@@ -3,6 +3,7 @@ import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { Button, StyleSheet, Text, TouchableOpacity, View, Switch, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { FontAwesome } from '@expo/vector-icons'; // Plus icon
 
 export default function App() {
   const [facing, setFacing] = useState<CameraType>('back');
@@ -14,6 +15,7 @@ export default function App() {
   const [scale, setScale] = useState(1);
   const [lastScale, setLastScale] = useState(1);
   const [scanned, setScanned] = useState(true); // Initialize as true to prevent scanning until button press
+  const [selectedScanType, setSelectedScanType] = useState("Barcode");
 
   useEffect(() => {
     if (permission === null) {
@@ -53,6 +55,9 @@ export default function App() {
   };
 
   const handleBarcodeScanned = ({ type, data }) => {
+    if(scanned) {
+      return;
+    }
     setScanned(true); // Set scanned to true immediately after a successful scan
     Alert.alert(
       "Scanned Data",
@@ -77,20 +82,36 @@ export default function App() {
             zoom={scale - 1}
             onBarcodeScanned={scanned ? undefined : handleBarcodeScanned} // Conditionally enable scanning
             barcodeScannerSettings={{
-              barcodeTypes: ["qr"],
+              barcodeTypes: ["qr", "pdf417", "aztec", "codabar", "code128", "code39", "datamatrix", "ean13", "ean8", "itf14", "upc_a", "upc_e"],
             }}
           />
         </PinchGestureHandler>
+        <View
+          style={[
+            styles.overlayBorder,
+            selectedScanType === "QRCode" ? styles.squareBorder : styles.rectangleBorder,
+          ]}
+        />
+      </View>
+
+      <View style={styles.scannerContainer}>
+        <TouchableOpacity style={styles.tabButton} onPress={() => setSelectedScanType("Barcode")}>
+          <Text style={styles.tabText}>Barcode</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabButton} onPress={() => setSelectedScanType("QRCode")}>
+          <Text style={styles.tabText}>QR Code</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.tabButton} onPress={() => setSelectedScanType("LicensePlate")}>
+          <Text style={styles.tabText}>License Plate</Text>
+        </TouchableOpacity>
       </View>
 
       <View style={styles.controlContainer}>
-        <Button 
-          title="Scan QR Code" 
-          onPress={() => {
-            setScanType("QRCode"); // Set to QR scanning
-            setScanned(false); // Enable scanning
-          }} 
-        />
+        <TouchableOpacity style={styles.scanButton} onPress={() => setScanned(false)}>
+          <FontAwesome name="plus" size={24} color="black" />
+          <Text style={styles.scanText}>Scan</Text>
+        </TouchableOpacity>
+
 
         <View style={styles.optionRow}>
           <Text style={styles.optionText}>Military</Text>
@@ -103,7 +124,7 @@ export default function App() {
           <Text style={styles.optionText}>Rental</Text>
         </View>
 
-        <Picker
+        {/* <Picker
           selectedValue={scanType}
           style={styles.dropdown}
           onValueChange={(itemValue) => setScanType(itemValue)}
@@ -112,11 +133,11 @@ export default function App() {
           <Picker.Item label="Barcode" value="Barcode" />
           <Picker.Item label="QR Code" value="QRCode" />
           <Picker.Item label="License Plate" value="LicensePlate" />
-        </Picker>
+        </Picker> */}
       </View>
 
       <View style={styles.tabContainer}>
-        <TouchableOpacity style={styles.tabButton} onPress={() => setScanned(false)}>
+        <TouchableOpacity style={styles.tabButton}>
           <Text style={styles.tabText}>Scan</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.tabButton}>
@@ -140,23 +161,31 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   cameraContainer: {
-    flex: 1,
+    flex: 0.65, // Occupy 65% of the screen
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
-    marginTop: 40,
+    backgroundColor: 'black', // Optional for better visualization
   },
-  camera: {
-    width: '90%',
-    height: '90%',
-    borderRadius: 10,
-    overflow: 'hidden',
+  scannerContainer: {
+    flex: 0.05, // Adjust to 20% of the screen or your desired size
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    textAlign: 'auto',
+    backgroundColor: '#222',
   },
   controlContainer: {
-    flex: 1,
+    flex: 0.15, // Remaining 15% of the screen
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 5,
     backgroundColor: 'black',
+  },
+  camera: {
+    width: '95%', // Full width of the container
+    height: '90%', // Full height of the container
+    borderRadius: 10,
+    overflow: 'hidden',
+    marginTop: 40,
   },
   optionRow: {
     flexDirection: 'row',
@@ -180,9 +209,12 @@ const styles = StyleSheet.create({
     height: 40,
   },
   tabContainer: {
+    position: 'absolute', 
+    bottom: 0, 
+    width: '100%', 
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingVertical: 15,
+    paddingVertical: 20,
     backgroundColor: '#222',
   },
   tabButton: {
@@ -192,5 +224,42 @@ const styles = StyleSheet.create({
   tabText: {
     color: 'white',
     fontSize: 18,
+  },
+  overlayBorder: {
+    position: 'absolute',
+    borderWidth: 2,
+    borderColor: 'white',
+    zIndex: 1,
+  },
+  squareBorder: {
+    width: '70%', // Adjust size as needed
+    height: '50%',
+    alignSelf: 'center', // Center it within the camera
+  },
+  rectangleBorder: {
+    width: '80%',
+    height: '30%',
+    alignSelf: 'center', // Center it within the camera
+  },
+  scanButton: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'white',
+    width: 80,
+    height: 80,
+    borderRadius: 30, // Makes it circular
+    shadowColor: '#000', // Optional: Shadow for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3, // Shadow for Android
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  scanText: {
+    marginTop: 2, // Space between icon and text
+    color: 'black',
+    fontSize: 18,
+    textAlign: 'center',
   },
 });
