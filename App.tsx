@@ -7,7 +7,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker'
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import MapView from 'react-native-maps';
+import MapView, {Marker} from 'react-native-maps';
 import { FontAwesome } from '@expo/vector-icons';
 
 // Define the tab navigator
@@ -159,16 +159,28 @@ const ProfileScreen = () => {
 
 // Maps Screen
 const MapsScreen = () => {
+  const initialRegion = {
+    latitude: 37.78825,         // Center latitude
+    longitude: -122.4324,       // Center longitude
+    latitudeDelta: 0.0922,      // Vertical span in degrees (~10 km)
+    longitudeDelta: 0.0421,     // Horizontal span in degrees (~5 km)
+  };
+
   return (
     <MapView
       style={StyleSheet.absoluteFillObject}
-      initialRegion={{
-        latitude: 37.78825,
-        longitude: -122.4324,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      }}
-    />
+      initialRegion={initialRegion}
+    >
+      {/* Add Marker */}
+      <Marker
+        coordinate={{
+          latitude: initialRegion.latitude,
+          longitude: initialRegion.longitude,
+        }}
+        title="Starting Point" // Optional: Title shown on tap
+        description="This is the starting center point." // Optional: Description shown on tap
+      />
+    </MapView>
   );
 };
 
