@@ -5,6 +5,7 @@ import { Picker } from '@react-native-picker/picker';
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer, NavigationProp } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
+import CarView from './CarView';
 
 const Stack = createStackNavigator();
 
@@ -12,7 +13,7 @@ type RootStackParamList = {
   MainScreen: undefined;
   ProfileScreen: undefined;
   MapScreen: undefined;
-  CarView: undefined;
+  CarView: undefined
 };
 
 type MainScreenProps = {
@@ -124,15 +125,6 @@ function MainScreen({ navigation }: MainScreenProps) {
         </TouchableOpacity>
       </View>
     </GestureHandlerRootView>
-  );
-}
-
-// Dummy CarView Screen
-function CarView() {
-  return (
-    <View style={styles.screenContainer}>
-      <Text style={styles.screenText}>Car View</Text>
-    </View>
   );
 }
 
