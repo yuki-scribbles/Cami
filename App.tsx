@@ -1,11 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react';
+// App.tsx
+import React from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
+import { useState, useRef, useEffect } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, Switch, Alert } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { NavigationContainer } from '@react-navigation/native';
+import { Picker } from '@react-native-picker/picker'
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
-import { FontAwesome } from '@expo/vector-icons'; // Plus icon
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import MapView, {Marker} from 'react-native-maps';
+import { FontAwesome } from '@expo/vector-icons';
 
-export default function App() {
+// Define the tab navigator
+const Tab = createBottomTabNavigator();
+
+// Scan Screen
+const ScanScreen = () => {
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [isMilitary, setIsMilitary] = useState(false);
@@ -135,23 +144,80 @@ export default function App() {
           <Picker.Item label="License Plate" value="LicensePlate" />
         </Picker> */}
       </View>
-
-      <View style={styles.tabContainer}>
-        <TouchableOpacity style={styles.tabButton}>
-          <Text style={styles.tabText}>Scan</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabButton}>
-          <Text style={styles.tabText}>Profile</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.tabButton}>
-          <Text style={styles.tabText}>Maps</Text>
-        </TouchableOpacity>
-      </View>
     </GestureHandlerRootView>
   );
 }
 
+// Profile Screen
+const ProfileScreen = () => {
+  return (
+    <View style={styles.screen}>
+      <Text style={styles.text}>Profile Screen</Text>
+    </View>
+  );
+};
+
+// Maps Screen
+const MapsScreen = () => {
+  const initialRegion = {
+    latitude: 37.78825,         // Center latitude
+    longitude: -122.4324,       // Center longitude
+    latitudeDelta: 0.0922,      // Vertical span in degrees (~10 km)
+    longitudeDelta: 0.0421,     // Horizontal span in degrees (~5 km)
+  };
+
+  return (
+    <MapView
+      style={StyleSheet.absoluteFillObject}
+      initialRegion={initialRegion}
+    >
+      {/* Add Marker */}
+      <Marker
+        coordinate={{
+          latitude: initialRegion.latitude,
+          longitude: initialRegion.longitude,
+        }}
+        title="Starting Point" // Optional: Title shown on tap
+        description="This is the starting center point." // Optional: Description shown on tap
+      />
+    </MapView>
+  );
+};
+
+// App Component
+const App = () => {
+  return (
+    <NavigationContainer>
+      <Tab.Navigator
+        screenOptions={{ //this is what contains all the info for navbar styling
+          headerShown: false,
+          tabBarStyle: { backgroundColor: '#000', height: 72 },
+          tabBarInactiveTintColor: '#fff',
+          tabBarActiveTintColor: '#fff',
+          tabBarLabelStyle: {fontSize: 20, textAlign: 'center'},
+          tabBarIconStyle: {display: 'none'},
+          
+        }}
+      >
+        <Tab.Screen name="Scan" component={ScanScreen} />
+        <Tab.Screen name="Profile" component={ProfileScreen} />
+        <Tab.Screen name="Maps" component={MapsScreen} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+};
+
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#000'
+  },
   container: {
     flex: 1,
     backgroundColor: 'black',
@@ -263,3 +329,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+export default App;
