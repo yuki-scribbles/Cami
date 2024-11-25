@@ -1,6 +1,6 @@
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, Image, ScrollView, TouchableOpacity, Modal, Button, Dimensions } from 'react-native';
-import Carousel from 'react-native-snap-carousel';
+import Carousel from 'react-native-reanimated-carousel';
 
 type SeverityLevel = 'Low' | 'Medium' | 'High';
 
@@ -19,13 +19,12 @@ const CarView = () => {
   };
 
   const images = [
-    require('./assets/car1.webp'),
-    require('./assets/car2.webp'),
-    require('./assets/car3.webp'),
+    require('./assets/favicon.png'),
+    require('./assets/car.webp'),
+    require('./assets/icon.png'),
   ];
 
   const [selectedDamage, setSelectedDamage] = useState<null | { part: string; description: string }>(null);
-  const carouselRef = useRef<Carousel<string> | null>(null);
 
   const severityStyles: Record<SeverityLevel, object> = {
     Low: styles.severityLow,
@@ -33,23 +32,24 @@ const CarView = () => {
     High: styles.severityHigh,
   };
 
-  const renderImage = ({ item }: { item: any }) => (
-    <Image source={item} style={styles.carouselImage} />
-  );
-
   return (
     <ScrollView style={styles.container}>
+      {/* Carousel */}
       <View style={styles.carouselContainer}>
         <Carousel
-          ref={carouselRef}
+          loop
+          width={screenWidth}
+          height={250}
+          autoPlay={true}
           data={images}
-          renderItem={renderImage}
-          sliderWidth={screenWidth}
-          itemWidth={screenWidth * 0.8}
-          loop={true}
+          scrollAnimationDuration={1000}
+          renderItem={({ item }) => (
+            <Image source={item} style={styles.carouselImage} />
+          )}
         />
       </View>
 
+      {/* Car Info Section */}
       <View style={styles.infoContainer}>
         <Text style={styles.carModel}>{carData.model}</Text>
         <Text style={styles.carDetails}>
@@ -57,6 +57,7 @@ const CarView = () => {
         </Text>
       </View>
 
+      {/* Damages Section */}
       <View style={styles.damageContainer}>
         <Text style={styles.sectionTitle}>Damages</Text>
         {carData.damages.map((damage, index) => (
@@ -73,6 +74,7 @@ const CarView = () => {
         ))}
       </View>
 
+      {/* Damage Detail Modal */}
       {selectedDamage && (
         <Modal
           transparent={true}
