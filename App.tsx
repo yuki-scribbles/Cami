@@ -169,6 +169,7 @@ const ProfileScreen = () => {
   );
 };
 
+// Car View Screen
 const CarScreen = () => {
   const carData = {
     model: 'Toyota Camry',
