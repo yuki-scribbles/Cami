@@ -3,23 +3,30 @@ import React from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
 import { Button, StyleSheet, Text, TouchableOpacity, View, Switch, Alert, Modal, Image, ScrollView, Dimensions} from 'react-native';
-import { NavigationContainer } from '@react-navigation/native';
+import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker'
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import MapView, {Marker} from 'react-native-maps';
 import { FontAwesome } from '@expo/vector-icons';
 import Carousel from 'react-native-reanimated-carousel';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 
 type SeverityLevel = 'Low' | 'Medium' | 'High';
 
 const { width: screenWidth } = Dimensions.get('window');
 
-// Define the tab navigator
-const Tab = createBottomTabNavigator();
+type RootTabParamList = {
+  Scan: undefined;
+  Profile: undefined;
+  Cars: undefined;
+};
 
+const Tab = createBottomTabNavigator<RootTabParamList>();
+
+type ScanScreenProps = BottomTabScreenProps<RootTabParamList, 'Scan'>;
 // Scan Screen
-const ScanScreen = () => {
+const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [isMilitary, setIsMilitary] = useState(false);
@@ -75,11 +82,11 @@ const ScanScreen = () => {
     setScanned(true); // Set scanned to true immediately after a successful scan
     Alert.alert(
       "Scanned Data",
-      `Scanned data: ${data} (Type: ${type})`,
+      `Data: ${data}, Type: ${type}`,
       [
         {
-          text: "OK",
-          onPress: () => setScanned(true), // Reset scanned state only when alert is dismissed
+          text: "Go to Cars",
+          onPress: () => navigation.navigate('Cars'),
         },
       ]
     );
