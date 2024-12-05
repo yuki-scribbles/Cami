@@ -122,9 +122,9 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
         <TouchableOpacity style={styles.tabButton} onPress={() => setSelectedScanType("QRCode")}>
           <Text style={styles.tabText}>QR Code</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tabButton} onPress={() => setSelectedScanType("LicensePlate")}>
+        {/* <TouchableOpacity style={styles.tabButton} onPress={() => setSelectedScanType("LicensePlate")}>
           <Text style={styles.tabText}>License Plate</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       <View style={styles.controlContainer}>
@@ -134,7 +134,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
         </TouchableOpacity>
 
 
-        <View style={styles.optionRow}>
+        {/* <View style={styles.optionRow}>
           <Text style={styles.optionText}>Military</Text>
           <Switch
             value={isMilitary}
@@ -143,7 +143,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
             thumbColor={isMilitary ? "#f5dd4b" : "#f4f3f4"}
           />
           <Text style={styles.optionText}>Rental</Text>
-        </View>
+        </View> */}
 
         {/* <Picker
           selectedValue={scanType}
@@ -329,7 +329,7 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
   },
   cameraContainer: {
-    flex: 0.65, // Occupy 65% of the screen
+    flex: 0.8, // Occupy 65% of the screen
     justifyContent: 'center',
     alignItems: 'center',
     overflow: 'hidden',
