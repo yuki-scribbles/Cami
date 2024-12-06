@@ -11,6 +11,7 @@ import MapView, {Marker} from 'react-native-maps';
 import { FontAwesome } from '@expo/vector-icons';
 import Carousel from 'react-native-reanimated-carousel';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 
 type SeverityLevel = 'Low' | 'Medium' | 'High';
 
@@ -20,9 +21,11 @@ type RootTabParamList = {
   Scan: undefined;
   Profile: undefined;
   Cars: undefined;
+  Maps: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
+const Stack = createStackNavigator();
 
 type ScanScreenProps = BottomTabScreenProps<RootTabParamList, 'Scan'>;
 // Scan Screen
@@ -170,7 +173,7 @@ const ProfileScreen = () => {
 };
 
 // Car View Screen
-const CarScreen = () => {
+const CarScreen = ({navigation}) => {
   const carData = {
     model: 'Toyota Camry',
     licensePlate: 'XYZ-1234',
@@ -238,6 +241,8 @@ const CarScreen = () => {
         ))}
       </View>
 
+      <Button title = "maps button" onPress={()=>navigation.navigate('Maps')}></Button>
+
       {/* Damage Detail Modal */}
       {selectedDamage && (
         <Modal
@@ -286,25 +291,38 @@ const MapsScreen = () => {
   );
 };
 
+// Tab Navigator, which will be used as a screen inside the Stack Navigator
+function MyTabs() {
+  return (
+    <Tab.Navigator
+      screenOptions={{ //this is what contains all the info for navbar styling
+      headerShown: false,
+      tabBarStyle: { backgroundColor: '#000', height: 72 },
+      tabBarInactiveTintColor: '#fff',
+      tabBarActiveTintColor: '#fff',
+      tabBarLabelStyle: {fontSize: 20, textAlign: 'center'},
+      tabBarIconStyle: {display: 'none'},
+      
+    }}
+    initialRouteName='Scan'
+  >
+    <Tab.Screen name="Profile" component={ProfileScreen} />
+    <Tab.Screen name="Scan" component={ScanScreen} />
+    <Tab.Screen name="Cars" component={CarScreen} />
+    </Tab.Navigator>
+  );
+}
+
 // App Component
 const App = () => {
   return (
     <NavigationContainer>
-      <Tab.Navigator
-        screenOptions={{ //this is what contains all the info for navbar styling
-          headerShown: false,
-          tabBarStyle: { backgroundColor: '#000', height: 72 },
-          tabBarInactiveTintColor: '#fff',
-          tabBarActiveTintColor: '#fff',
-          tabBarLabelStyle: {fontSize: 20, textAlign: 'center'},
-          tabBarIconStyle: {display: 'none'},
-          
-        }}
-      >
-        <Tab.Screen name="Scan" component={ScanScreen} />
-        <Tab.Screen name="Profile" component={ProfileScreen} />
-        <Tab.Screen name="Cars" component={CarScreen} />
-      </Tab.Navigator>
+      <Stack.Navigator initialRouteName="Tabs">
+        {/* Tab Navigator is now a screen inside the Stack Navigator */}
+        <Stack.Screen name="Tabs" component={MyTabs} options={{headerShown: false}} />
+        {/* Additional Stack Screens */}
+        <Stack.Screen name="Maps" component={MapsScreen} options={{headerShown: false}} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 };
