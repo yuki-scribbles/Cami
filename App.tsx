@@ -264,6 +264,55 @@ const CarScreen = ({navigation}) => {
   );
 };
 
+const SettingsScreen = () => {
+  // State hooks for Dark Mode and Text Size
+  const [isDarkMode, setIsDarkMode] = React.useState(false);
+  const [textSize, setTextSize] = React.useState('Medium');
+
+  const toggleDarkMode = () => setIsDarkMode((prevMode) => !prevMode);
+
+  return (
+    <ScrollView style={styles.screen}>
+      <Text style={styles.header}>Settings</Text>
+
+      {/* Appearance Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionHeader}>Appearance</Text>
+        <View style={styles.row}>
+          <Text style={styles.label}>Dark Mode</Text>
+          <Switch value={isDarkMode} onValueChange={toggleDarkMode} />
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Text Size</Text>
+          <TouchableOpacity
+            style={styles.textSizeButton}
+            onPress={() => setTextSize(textSize === 'Medium' ? 'Large' : 'Medium')}
+          >
+            <Text style={styles.buttonText}>{textSize}</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Help Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionHeader}>Help</Text>
+        <TouchableOpacity style={styles.row}>
+          <Text style={styles.label}>Scan</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.row}>
+          <Text style={styles.label}>Profile</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.row}>
+          <Text style={styles.label}>Your Vehicles</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.row}>
+          <Text style={styles.label}>Maps</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+};
+
 // Maps Screen
 const MapsScreen = () => {
   const initialRegion = {
