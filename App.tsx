@@ -13,6 +13,27 @@ import Carousel from 'react-native-reanimated-carousel';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
+// These are for Firebase Authentication
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'firebase/auth';
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD4GPtrN1J6fmAvOE0aoOManp1ySO3YdBM",
+  authDomain: "cami-9ed69.firebaseapp.com",
+  databaseURL: "https://cami-9ed69-default-rtdb.firebaseio.com",
+  projectId: "cami-9ed69",
+  storageBucket: "cami-9ed69.firebasestorage.app",
+  messagingSenderId: "546492429326",
+  appId: "1:546492429326:web:fd536d63f6f076d247785f",
+  measurementId: "G-VHT606X84T"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+
 type SeverityLevel = 'Low' | 'Medium' | 'High';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -294,15 +315,42 @@ const MapsScreen = () => {
 };
 
 const LoginScreen = ({navigation}) =>{
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // function that actually handles login
+  const handleLogin = (email, password) => {
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          // Handle authentication state change
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              // User is signed in, log the UID and redirect to HomeNav
+              navigation.navigate("Tabs");
+            } else {
+              alert("Invalid ID or Password");
+              // User is signed out, handle accordingly
+              navigation.navigate("Login")// Redirect to Login
+            }
+          });
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          alert(errorMessage);
+        });
+  };
+
   return (
     <View style={styles.Logincontainer}>
       <Text style={styles.loginTitle}>Login</Text>
       <Text style={styles.loginText}>Please sign in to continue</Text>
-      <TextInput style={styles.loginInput} placeholder='Enter your email' autoFocus={false}></TextInput>
-      <TextInput style={styles.loginInput} placeholder='Enter your password' autoFocus={false}></TextInput>
+      <TextInput style={styles.loginInput} placeholder='Enter your email' autoFocus={false} onChangeText={setEmail}></TextInput>
+      <TextInput style={styles.loginInput} placeholder='Enter your password' secureTextEntry={true} autoFocus={false} onChangeText={setPassword}></TextInput>
 
       {/* actual Login Button */}
-      <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Tabs')}>
+      <TouchableOpacity style={styles.loginButton} onPress={() => handleLogin(email, password)}>
         <Text style={styles.loginButtonText}>Login</Text>
       </TouchableOpacity>
 
@@ -316,22 +364,39 @@ const LoginScreen = ({navigation}) =>{
 };
 
 const SignUpScreen = ({navigation}) =>{
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleRegistration = (email, password) => {
+    createUserWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            const user = userCredential.user;
+            navigation.navigate("Tabs");
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            alert(errorMessage);
+          });
+  };
+
   return (
     <View style={styles.Logincontainer}>
       <Text style={styles.loginTitle}>Register Now!</Text>
       <Text style={styles.loginText}>Please provide your information to continue</Text>
-      <TextInput style={styles.loginInput} placeholder='Enter your email' autoFocus={false}></TextInput>
-      <TextInput style={styles.loginInput} placeholder='Enter your password' autoFocus={false}></TextInput>
+      <TextInput style={styles.loginInput} placeholder='Enter your email' autoFocus={false} onChangeText={setEmail}></TextInput>
+      <TextInput style={styles.loginInput} placeholder='Enter your password' autoFocus={false} secureTextEntry={true} onChangeText={(setPassword)}></TextInput>
 
       {/* actual Register Button */}
-      <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Tabs')}>
+      <TouchableOpacity style={styles.loginButton} onPress={() => handleRegistration(email, password)}>
         <Text style={styles.loginButtonText}>Register</Text>
       </TouchableOpacity>
 
       {/* Link to Log In Page */}
-      <Text style={styles.signupText}>Dont have an account?</Text>
+      <Text style={styles.signupText}>Already have an account?</Text>
       <TouchableOpacity style={styles.signupLink} onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.signupLinkText}>Click here to Sign Up!</Text>
+        <Text style={styles.loginLinkText}>Click here to Log In!</Text>
       </TouchableOpacity>
     </View>
   );
@@ -640,6 +705,10 @@ const styles = StyleSheet.create({
     marginBottom: 37,
   },
   signupLinkText: {
+    color: 'blue',
+  },
+  loginLinkText: {
+    left: 8,
     color: 'blue',
   },
 });
