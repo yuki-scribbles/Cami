@@ -2,7 +2,7 @@
 import React from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
-import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View, Switch, Alert, Modal, Image, ScrollView, Dimensions} from 'react-native';
+import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View, Switch, Alert, Modal, Image, ScrollView, Dimensions, TouchableWithoutFeedback, Animated} from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker'
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -101,7 +101,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
     }
   };
 
-  const handleBarcodeScanned = ({ type, data }) => {
+  const handleBarcodeScanned = ({ type, data }:{type:any, data: any}) => {
     if(scanned) {
       return;
     }
@@ -267,7 +267,7 @@ const CarScreen = (navigation :any) => {
       <Button title = "maps button" onPress={()=>navigation.navigate('Maps')}></Button>
 
       {/* Damage Detail Modal */}
-      {selectedDamage && (
+      {/* {selectedDamage && (
         <Modal
           transparent={true}
           animationType="slide"
@@ -282,10 +282,53 @@ const CarScreen = (navigation :any) => {
             </View>
           </View>
         </Modal>
-      )}
+      )} */}
+
+      <Accordion title = "damage" text = "hello"/>
+
     </ScrollView>
   );
 };
+
+export function Accordion({ title, text }: { title: string; text: string }){
+  const [collapsed, setCollapsed] = useState(true);
+  const [animation] = useState(new Animated.Value(0));
+
+  const toggleCollapse = () => {
+    if (collapsed) {
+      Animated.timing(animation, {
+        toValue: 1,
+        duration: 300,
+        useNativeDriver: true
+      }).start();
+    } else {
+      Animated.timing(animation, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true
+      }).start();
+    }
+    setCollapsed(!collapsed);
+  };
+
+  const heightInterpolate = animation.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 200]
+  });
+
+  return (
+    <View>
+      <TouchableWithoutFeedback onPress={toggleCollapse}>
+        <View>
+          <Text>{title}</Text>
+        </View>
+      </TouchableWithoutFeedback>
+      <Animated.View style={{ height: heightInterpolate }}>
+        <Text>{text}</Text>
+      </Animated.View>
+    </View>
+  );
+}
 
 // Maps Screen
 const MapsScreen = () => {
