@@ -2,7 +2,7 @@
 import React from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Switch, Alert, Modal, Image, ScrollView, Dimensions} from 'react-native';
+import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View, Switch, Alert, Modal, Image, ScrollView, Dimensions} from 'react-native';
 import { NavigationContainer, useNavigation } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker'
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -13,6 +13,27 @@ import Carousel from 'react-native-reanimated-carousel';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 
+// These are for Firebase Authentication
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'firebase/auth';
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD4GPtrN1J6fmAvOE0aoOManp1ySO3YdBM",
+  authDomain: "cami-9ed69.firebaseapp.com",
+  databaseURL: "https://cami-9ed69-default-rtdb.firebaseio.com",
+  projectId: "cami-9ed69",
+  storageBucket: "cami-9ed69.firebasestorage.app",
+  messagingSenderId: "546492429326",
+  appId: "1:546492429326:web:fd536d63f6f076d247785f",
+  measurementId: "G-VHT606X84T"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+
 type SeverityLevel = 'Low' | 'Medium' | 'High';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -22,6 +43,8 @@ type RootTabParamList = {
   Profile: undefined;
   Cars: undefined;
   Maps: undefined;
+  Login: undefined;
+  SignUp: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -291,6 +314,94 @@ const MapsScreen = () => {
   );
 };
 
+const LoginScreen = ({navigation}) =>{
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  // function that actually handles login
+  const handleLogin = (email, password) => {
+    signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          const user = userCredential.user;
+          // Handle authentication state change
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              // User is signed in, log the UID and redirect to HomeNav
+              navigation.navigate("Tabs");
+            } else {
+              alert("Invalid ID or Password");
+              // User is signed out, handle accordingly
+              navigation.navigate("Login")// Redirect to Login
+            }
+          });
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          alert(errorMessage);
+        });
+  };
+
+  return (
+    <View style={styles.Logincontainer}>
+      <Text style={styles.loginTitle}>Login</Text>
+      <Text style={styles.loginText}>Please sign in to continue</Text>
+      <TextInput style={styles.loginInput} placeholder='Enter your email' autoFocus={false} onChangeText={setEmail}></TextInput>
+      <TextInput style={styles.loginInput} placeholder='Enter your password' secureTextEntry={true} autoFocus={false} onChangeText={setPassword}></TextInput>
+
+      {/* actual Login Button */}
+      <TouchableOpacity style={styles.loginButton} onPress={() => handleLogin(email, password)}>
+        <Text style={styles.loginButtonText}>Login</Text>
+      </TouchableOpacity>
+
+      {/* Link to Sign In Page */}
+      <Text style={styles.signupText}>Dont have an account?</Text>
+      <TouchableOpacity style={styles.signupLink} onPress={() => navigation.navigate('SignUp')}>
+        <Text style={styles.signupLinkText}>Click here to Sign Up!</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
+const SignUpScreen = ({navigation}) =>{
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleRegistration = (email, password) => {
+    createUserWithEmailAndPassword(auth, email, password)
+          .then((userCredential) => {
+            const user = userCredential.user;
+            navigation.navigate("Tabs");
+          })
+          .catch((error) => {
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            alert(errorMessage);
+          });
+  };
+
+  return (
+    <View style={styles.Logincontainer}>
+      <Text style={styles.loginTitle}>Register Now!</Text>
+      <Text style={styles.loginText}>Please provide your information to continue</Text>
+      <TextInput style={styles.loginInput} placeholder='Enter your email' autoFocus={false} onChangeText={setEmail}></TextInput>
+      <TextInput style={styles.loginInput} placeholder='Enter your password' autoFocus={false} secureTextEntry={true} onChangeText={(setPassword)}></TextInput>
+
+      {/* actual Register Button */}
+      <TouchableOpacity style={styles.loginButton} onPress={() => handleRegistration(email, password)}>
+        <Text style={styles.loginButtonText}>Register</Text>
+      </TouchableOpacity>
+
+      {/* Link to Log In Page */}
+      <Text style={styles.signupText}>Already have an account?</Text>
+      <TouchableOpacity style={styles.signupLink} onPress={() => navigation.navigate('Login')}>
+        <Text style={styles.loginLinkText}>Click here to Log In!</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 // Tab Navigator, which will be used as a screen inside the Stack Navigator
 function MyTabs() {
   return (
@@ -317,11 +428,13 @@ function MyTabs() {
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Tabs">
+      <Stack.Navigator initialRouteName="Login">
         {/* Tab Navigator is now a screen inside the Stack Navigator */}
         <Stack.Screen name="Tabs" component={MyTabs} options={{headerShown: false}} />
         {/* Additional Stack Screens */}
         <Stack.Screen name="Maps" component={MapsScreen} options={{headerShown: false}} />
+        <Stack.Screen name="Login" component={LoginScreen} options = {{headerShown: false}}/>
+        <Stack.Screen name="SignUp" component={SignUpScreen} options = {{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -534,6 +647,69 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  Logincontainer: {
+    flex: 1,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    padding: 16,
+    alignItems: 'center',
+  },
+  loginInput: {
+    height: 40,
+    width: 300,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    marginBottom: 8,
+  },
+  loginTitle: {
+    color: 'black',
+    alignSelf: 'flex-start',
+    left: 40,
+    fontWeight: 'bold',
+    fontSize: 25,
+    marginBottom: 6,
+  },
+  loginText: {
+    height: 25,
+    color: 'black',
+    alignSelf: 'flex-start',
+    left: 40,
+    marginBottom: 40,
+  },
+  loginButton: {
+    backgroundColor: 'black',
+    paddingVertical: 10,
+    paddingHorizontal: 40,
+    borderRadius: 5,
+  },
+  loginButtonText: {
+    color: 'white',
+    fontSize: 15,
+    fontWeight: 'bold',
+  },
+  signupText: {
+    position: 'absolute', //ignore the flexbox alignment
+    height: 25,
+    color: 'black',
+    left: 67,
+    bottom: 0,
+    marginBottom: 30,
+  },
+  signupLink: {
+    position: 'absolute',
+    right: 67,
+    bottom: 0,
+    marginBottom: 37,
+  },
+  signupLinkText: {
+    color: 'blue',
+  },
+  loginLinkText: {
+    left: 8,
+    color: 'blue',
   },
 });
 
