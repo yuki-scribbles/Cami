@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
     color: 'blue',
   },
   loginLogo: {
-    bottom: 180,
+    bottom: 130,
     right: 0,
     left: 0,
     alignSelf: 'center',
