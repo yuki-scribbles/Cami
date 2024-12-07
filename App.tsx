@@ -1,4 +1,3 @@
-// App.tsx
 import React from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
@@ -20,6 +19,7 @@ type RootTabParamList = {
   Scan: undefined;
   Profile: undefined;
   Cars: undefined;
+  Settings: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -160,16 +160,40 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
   );
 }
 
-// Profile Screen
-const ProfileScreen = () => {
+const SettingsScreen = () => {
   return (
     <View style={styles.screen}>
-      <Text style={styles.text}>Profile Screen</Text>
+      <Text style={styles.text}>Settings Screen</Text>
     </View>
   );
 };
 
-// Car View Screen
+type ProfileScreenProps = BottomTabScreenProps<RootTabParamList, 'Profile'>;
+
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
+  const handleSettingsPress = () => {
+    navigation.navigate('Settings');
+  };
+
+  return (
+    <View style={styles.profileScreen}>
+      <View style={styles.profileContainer}>
+        <Image
+          source={{ uri: "https://via.placeholder.com/100" }}
+          style={styles.profileImage}
+        />
+        <Text style={styles.name}>John Doe</Text>
+        <Text style={styles.info}>Email: johndoe@example.com</Text>
+        <Text style={styles.info}>Role: Manager</Text>
+        <Text style={styles.info}>Location: Los Angeles, CA</Text>
+      </View>
+      <TouchableOpacity style={styles.settingsButton} onPress={handleSettingsPress}>
+        <Text style={styles.settingsButtonText}>Go to Settings</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 const CarScreen = () => {
   const carData = {
     model: 'Toyota Camry',
@@ -198,7 +222,6 @@ const CarScreen = () => {
 
   return (
     <ScrollView style={styles.container}>
-      {/* Carousel */}
       <View style={styles.carouselContainer}>
         <Carousel
           loop
@@ -213,7 +236,6 @@ const CarScreen = () => {
         />
       </View>
 
-      {/* Car Info Section */}
       <View style={styles.infoContainer}>
         <Text style={styles.carModel}>{carData.model}</Text>
         <Text style={styles.carDetails}>
@@ -221,7 +243,6 @@ const CarScreen = () => {
         </Text>
       </View>
 
-      {/* Damages Section */}
       <View style={styles.damageContainer}>
         <Text style={styles.sectionTitle}>Damages</Text>
         {carData.damages.map((damage, index) => (
@@ -304,6 +325,7 @@ const App = () => {
         <Tab.Screen name="Scan" component={ScanScreen} />
         <Tab.Screen name="Profile" component={ProfileScreen} />
         <Tab.Screen name="Cars" component={CarScreen} />
+        <Tab.Screen name="Settings" component={SettingsScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
@@ -516,6 +538,53 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  profileScreen: {
+    flex: 1,
+    backgroundColor: "#f4f4f4",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  profileContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 15,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  info: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 5,
+  },
+  settingsButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  settingsButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
