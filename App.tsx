@@ -659,14 +659,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loginInput: {
-    height: 40,
-    width: 300,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 8,
+    width: '80%',
+    height: 50,
+    paddingHorizontal: 10,
+    backgroundColor: 'white',
+    borderColor: '#555',
+    borderRadius: 8,
+    borderWidth: 0.5,
     marginBottom: 8,
-    bottom: 90,
+    bottom: 100,
+
+    // iOS Shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+
+    // Android Shadow
+    elevation: 10,
   },
   loginTitle: {
     color: 'black',
