@@ -264,7 +264,7 @@ const CarScreen = ({navigation}) => {
         ))}
       </View>
 
-      <Button title = "maps button" onPress={()=>navigation.navigate('Maps')}></Button>
+      <Button title = "maps button" onPress={()=>navigation.navigate('Maps', { latitude: 37.78825, longitude: -122.4324 })}></Button>
 
       {/* Damage Detail Modal */}
       {selectedDamage && (
@@ -288,10 +288,11 @@ const CarScreen = ({navigation}) => {
 };
 
 // Maps Screen
-const MapsScreen = () => {
+const MapsScreen = ({ route }) => {
+  const {latitude, longitude} = route.params;
   const initialRegion = {
-    latitude: 37.78825,         // Center latitude
-    longitude: -122.4324,       // Center longitude
+    latitude: latitude,         // Center latitude
+    longitude: longitude,       // Center longitude
     latitudeDelta: 0.0922,      // Vertical span in degrees (~10 km)
     longitudeDelta: 0.0421,     // Horizontal span in degrees (~5 km)
   };
@@ -304,8 +305,8 @@ const MapsScreen = () => {
       {/* Add Marker */}
       <Marker
         coordinate={{
-          latitude: initialRegion.latitude,
-          longitude: initialRegion.longitude,
+          latitude: latitude,
+          longitude: longitude,
         }}
         title="Starting Point" // Optional: Title shown on tap
         description="This is the starting center point." // Optional: Description shown on tap
@@ -344,6 +345,7 @@ const LoginScreen = ({navigation}) =>{
 
   return (
     <View style={styles.Logincontainer}>
+      <Image source={require('./assets/Cami Logo.png')} style={styles.loginLogo}></Image>
       <Text style={styles.loginTitle}>Login</Text>
       <Text style={styles.loginText}>Please sign in to continue</Text>
       <TextInput style={styles.loginInput} placeholder='Enter your email' autoFocus={false} onChangeText={setEmail}></TextInput>
@@ -383,6 +385,7 @@ const SignUpScreen = ({navigation}) =>{
 
   return (
     <View style={styles.Logincontainer}>
+      <Image source={require('./assets/Cami Logo.png')} style={styles.loginLogo}></Image>
       <Text style={styles.loginTitle}>Register Now!</Text>
       <Text style={styles.loginText}>Please provide your information to continue</Text>
       <TextInput style={styles.loginInput} placeholder='Enter your email' autoFocus={false} onChangeText={setEmail}></TextInput>
@@ -663,6 +666,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 8,
     marginBottom: 8,
+    bottom: 90,
   },
   loginTitle: {
     color: 'black',
@@ -671,6 +675,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 25,
     marginBottom: 6,
+    bottom: 60,
   },
   loginText: {
     height: 25,
@@ -678,15 +683,17 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
     left: 40,
     marginBottom: 40,
+    bottom: 60,
   },
   loginButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#c9f0ff',
     paddingVertical: 10,
     paddingHorizontal: 40,
     borderRadius: 5,
+    bottom: 75,
   },
   loginButtonText: {
-    color: 'white',
+    color: 'black',
     fontSize: 15,
     fontWeight: 'bold',
   },
@@ -710,6 +717,12 @@ const styles = StyleSheet.create({
   loginLinkText: {
     left: 8,
     color: 'blue',
+  },
+  loginLogo: {
+    bottom: 180,
+    right: 0,
+    left: 0,
+    alignSelf: 'center',
   },
 });
 
