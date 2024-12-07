@@ -34,9 +34,9 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 
-type SeverityLevel = 'Low' | 'Medium' | 'High';
+export type SeverityLevel = 'Low' | 'Medium' | 'High';
 
-const { width: screenWidth } = Dimensions.get('window');
+export const { width: screenWidth } = Dimensions.get('window');
 
 type RootTabParamList = {
   Scan: undefined;
@@ -196,7 +196,7 @@ const ProfileScreen = () => {
 };
 
 // Car View Screen
-const CarScreen = ({navigation}) => {
+const CarScreen = (navigation :any) => {
   const carData = {
     model: 'Toyota Camry',
     licensePlate: 'XYZ-1234',
@@ -314,13 +314,13 @@ const MapsScreen = () => {
   );
 };
 
-const LoginScreen = ({navigation}) =>{
+const LoginScreen = (navigation :any) =>{
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   // function that actually handles login
-  const handleLogin = (email, password) => {
+  const handleLogin = (email : any, password : any) => {
     signInWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           const user = userCredential.user;
@@ -363,12 +363,12 @@ const LoginScreen = ({navigation}) =>{
   );
 };
 
-const SignUpScreen = ({navigation}) =>{
+const SignUpScreen = (navigation :any) =>{
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleRegistration = (email, password) => {
+  const handleRegistration = (email : any, password : any) => {
     createUserWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             const user = userCredential.user;
@@ -440,7 +440,7 @@ const App = () => {
   );
 };
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: 'center',
