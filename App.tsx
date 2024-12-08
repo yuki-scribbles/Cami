@@ -154,8 +154,8 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
 
       <View style={styles.controlContainer}>
         <TouchableOpacity style={styles.scanButton} onPress={() => setScanned(false)}>
-          <FontAwesome name="plus" size={24} color="black" />
-          <Text style={styles.scanText}>Scan</Text>
+          <View style={styles.circle}></View>
+          {/* <Text style={styles.scanText}>Scan</Text> */}
         </TouchableOpacity>
 
 
@@ -637,17 +637,17 @@ const styles = StyleSheet.create({
   scanButton: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'white',
-    width: 80,
-    height: 80,
-    borderRadius: 30, // Makes it circular
-    shadowColor: '#000', // Optional: Shadow for depth
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3, // Shadow for Android
+    backgroundColor: '#ccc',
+    borderRadius: 50,
+    width: 100,
+    height: 100,
     marginBottom: 10,
-    marginTop: 10,
+  },
+  circle: {
+    width: 75,
+    height: 75,
+    backgroundColor: '#333333', // Black circle
+    borderRadius: 37.5, // Half the width and height for a perfect circle
   },
   scanText: {
     marginTop: 2, // Space between icon and text
