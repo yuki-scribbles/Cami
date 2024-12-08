@@ -44,8 +44,8 @@ const { width: screenWidth } = Dimensions.get('window');
 type RootTabParamList = {
   Scan: undefined;
   Profile: undefined;
-  Cars: undefined;
-  Maps: undefined;
+  Cars: {carId: any};
+  Maps: {latitude: Number, longitude: Number};
   Login: undefined;
   SignUp: undefined;
 };
