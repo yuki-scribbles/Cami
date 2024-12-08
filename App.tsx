@@ -109,7 +109,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
       return;
     }
     setScanned(true); // Set scanned to true immediately after a successful scan
-    navigation.navigate('Cars', {carId: data}) // throws a fit here, but it still works :/
+    navigation.navigate('Cars', {carId: data}); // throws a fit here, but it still works :/
   };
 
   return (
