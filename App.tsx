@@ -2,7 +2,7 @@ import React from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
 import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View, Switch, Alert, Modal, Image, ScrollView, Dimensions} from 'react-native';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, useNavigation, RouteProp } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker'
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -10,11 +10,14 @@ import MapView, {Marker} from 'react-native-maps';
 import { FontAwesome } from '@expo/vector-icons';
 import Carousel from 'react-native-reanimated-carousel';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+
 
 // These are for Firebase Authentication
-import { initializeApp } from 'firebase/app';
+import { initializeApp,} from 'firebase/app';
+import { getDatabase, ref, child, get} from 'firebase/database';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'firebase/auth';
+import { red } from 'react-native-reanimated/lib/typescript/Colors';
 
 
 const firebaseConfig = {
@@ -31,6 +34,7 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getDatabase(app);
 
 
 type SeverityLevel = 'Low' | 'Medium' | 'High';
@@ -40,13 +44,14 @@ const { width: screenWidth } = Dimensions.get('window');
 type RootTabParamList = {
   Scan: undefined;
   Profile: undefined;
-  Cars: undefined;
-  Settings: undefined;
+  Cars: {carId: any};
+};
 
-  Maps: undefined;
+type RootStackParamList = {
+  Maps: {latitude: Number, longitude: Number};
   Login: undefined;
   SignUp: undefined;
-
+  Settings: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -108,16 +113,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
       return;
     }
     setScanned(true); // Set scanned to true immediately after a successful scan
-    Alert.alert(
-      "Scanned Data",
-      `Data: ${data}, Type: ${type}`,
-      [
-        {
-          text: "Go to Cars",
-          onPress: () => navigation.navigate('Cars'),
-        },
-      ]
-    );
+    navigation.navigate('Cars', {carId: data}); // throws a fit here, but it still works :/
   };
 
   return (
@@ -196,13 +192,12 @@ const SettingsScreen = () => {
   );
 };
 
-type ProfileScreenProps = BottomTabScreenProps<RootTabParamList, 'Profile'>;
-
-const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
-  const handleSettingsPress = () => {
-    navigation.navigate('Settings');
-  };
-
+type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
+type ProfileScreenProps = {
+  navigation: ProfileScreenNavigationProp;
+};
+// Profile Screen
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation })=> {
   return (
     <View style={styles.profileScreen}>
       <View style={styles.profileContainer}>
@@ -215,104 +210,140 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation }) => {
         <Text style={styles.info}>Role: Manager</Text>
         <Text style={styles.info}>Location: Los Angeles, CA</Text>
       </View>
-      <TouchableOpacity style={styles.settingsButton} onPress={handleSettingsPress}>
+      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
         <Text style={styles.settingsButtonText}>Go to Settings</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-const CarScreen = ({navigation}) => {
-  const carData = {
-    model: 'Toyota Camry',
-    licensePlate: 'XYZ-1234',
-    year: 2020,
-    damages: [
-      { part: 'Front Bumper', severity: 'Medium' as SeverityLevel, description: 'Scratches and dents on the front bumper.' },
-      { part: 'Rear Door', severity: 'Low' as SeverityLevel, description: 'Minor scratches on the left rear door.' },
-      { part: 'Windshield', severity: 'High' as SeverityLevel, description: 'Large crack across the windshield.' },
-    ],
+// Car View Screen
+const CarScreen = ({navigation, route}) => {
+  const {carId} = route.params; // when this is switched to be called by another page, this needs to be changed to route.params
+  const [carData, setCarData] = useState(null);
+  const [carDamages, setCarDamages] = useState(null);
+  const [isDetails, setIsDetails] = useState(true);
+  
+  useEffect(() => {
+    // Function to retrieve data for a specific item
+    const fetchItemData = async () => {
+      try {
+        const dbRef = ref(db);
+        const snapshot = await get(child(dbRef, 'Cars/'+carId)); // Specify the path to the item
+        if (snapshot.exists()) {
+          setCarData(snapshot.val());
+        } else {
+          console.log('No data available');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchItemData();
+  }, []);
+
+  useEffect(() => {
+    // Function to retrieve data for a specific item
+    const fetchItemData = async () => {
+      try {
+        const dbRef = ref(db);
+        const snapshot = await get(child(dbRef, 'Damages/'+carId)); // Specify the path to the item
+        if (snapshot.exists()) {
+          setCarDamages(snapshot.val());
+        } else {
+          console.log('No data available');
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchItemData();
+  }, []);
+
+  const toggleDetails = () => {
+    if (!isDetails) setIsDetails(!isDetails); // Switch to details
   };
-
-  const images = [
-    require('./assets/favicon.png'),
-    require('./assets/car.webp'),
-    require('./assets/icon.png'),
-  ];
-
-  const [selectedDamage, setSelectedDamage] = useState<null | { part: string; description: string }>(null);
-
-  const severityStyles: Record<SeverityLevel, object> = {
-    Low: styles.severityLow,
-    Medium: styles.severityMedium,
-    High: styles.severityHigh,
+  const toggleDamage = () => {
+    if (isDetails) setIsDetails(!isDetails); // Switch to damages
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.carouselContainer}>
-        <Carousel
-          loop
-          width={screenWidth}
-          height={250}
-          autoPlay={true}
-          data={images}
-          scrollAnimationDuration={1000}
-          renderItem={({ item }) => (
-            <Image source={item} style={styles.carouselImage} />
-          )}
-        />
-      </View>
+    <View style={styles.carViewContainer}>
+      {/* Car Info Section */}
+      <View style={styles.carImageContainer}>
+        {carData ? (
+        <>
+          {/* placeholder car image */}
+          <Image source={require('./assets/car.webp')} style={styles.carouselImage}></Image>
 
-      <View style={styles.infoContainer}>
-        <Text style={styles.carModel}>{carData.model}</Text>
-        <Text style={styles.carDetails}>
-          Year: {carData.year} | License Plate: {carData.licensePlate}
-        </Text>
-      </View>
-
-      <View style={styles.damageContainer}>
-        <Text style={styles.sectionTitle}>Damages</Text>
-        {carData.damages.map((damage, index) => (
-          <TouchableOpacity
-            key={index}
-            style={styles.damageItem}
-            onPress={() => setSelectedDamage({ part: damage.part, description: damage.description })}
-          >
-            <Text style={styles.damageText}>{damage.part}</Text>
-            <Text style={[styles.severityText, severityStyles[damage.severity]]}>
-              {damage.severity}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <Button title = "maps button" onPress={()=>navigation.navigate('Maps', { latitude: 37.78825, longitude: -122.4324 })}></Button>
-
-      {/* Damage Detail Modal */}
-      {selectedDamage && (
-        <Modal
-          transparent={true}
-          animationType="slide"
-          visible={!!selectedDamage}
-          onRequestClose={() => setSelectedDamage(null)}
-        >
-          <View style={styles.modalOverlay}>
-            <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>{selectedDamage.part}</Text>
-              <Text style={styles.modalDescription}>{selectedDamage.description}</Text>
-              <Button title="Close" onPress={() => setSelectedDamage(null)} />
-            </View>
+          {/* details / damage selector*/}
+          <View style={styles.carButtonContainer}>
+            <TouchableOpacity style={[styles.carInfoButton, {backgroundColor: isDetails ? '#687bb1' : '#3c4660'}]} onPress={toggleDetails}>
+              <Text style={styles.carInfoButtonText}>Car Info</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={[styles.carInfoButton, {backgroundColor: !isDetails ? '#687bb1' : '#3c4660'}]} onPress={toggleDamage}>
+              <Text style={styles.carInfoButtonText}>Reports</Text>
+            </TouchableOpacity>
           </View>
-        </Modal>
-      )}
-    </ScrollView>
+
+          {/* actual car detail information */}
+          <View style={styles.carInfoContainer}>
+            { isDetails ?(
+            <>
+              <View style={styles.leftColumn}>
+                <Text style={styles.carInfoText}>Model: </Text>
+                <Text style={styles.carInfoText}>Year: </Text>
+                <Text style={styles.carInfoText}>Liscence Plate: </Text>
+                <Text style={styles.carInfoText}>MPG: </Text>
+                <Text style={styles.carInfoText}>Features: </Text>
+              </View>
+              <View style={styles.rightColumn}>
+                <Text style={styles.carInfoText}>{carData.model}</Text>
+                <Text style={styles.carInfoText}>{carData.year}</Text>
+                <Text style={styles.carInfoText}>{carData.licensePlate}</Text>
+                <Text style={styles.carInfoText}>{carData.mpg} </Text>
+                <Text style={styles.carInfoText}>{carData.features}</Text>
+              </View>
+            </>
+            ) : (
+              <>
+              <View style={styles.leftColumn}>
+                <Text style={styles.carInfoText}>Rear Door: </Text>
+                <Text style={styles.carInfoText}>Windshield: </Text>
+              </View>
+              <View style={styles.rightColumn}>
+                <Text style={styles.carInfoText}>{carDamages.rearDoor}</Text>
+                <Text style={styles.carInfoText}>{carDamages.Windshield}</Text>
+
+              </View>
+            </>
+            )} 
+          </View>
+
+          {/* Map View Button */}
+          <TouchableOpacity style={styles.mapViewButton} onPress={()=>navigation.navigate('Maps', { latitude: carData.latitude, longitude: carData.longitude, carId: carId })}>
+            <Text style={styles.mapViewButtonText}>Map View</Text>
+          </TouchableOpacity>
+        </>
+        ) : (
+          <Text style={styles.loadingMsg}>Loading...</Text>
+        )}
+      </View>
+
+      
+
+    </View>
   );
 };
 
 // Maps Screen
 const MapsScreen = ({ route }) => {
-  const {latitude, longitude} = route.params;
+  const {latitude, longitude, carId} = route.params;
+
+  const navigation = useNavigation();
+
   const initialRegion = {
     latitude: latitude,         // Center latitude
     longitude: longitude,       // Center longitude
@@ -321,20 +352,27 @@ const MapsScreen = ({ route }) => {
   };
 
   return (
-    <MapView
-      style={StyleSheet.absoluteFillObject}
-      initialRegion={initialRegion}
-    >
-      {/* Add Marker */}
-      <Marker
-        coordinate={{
-          latitude: latitude,
-          longitude: longitude,
-        }}
-        title="Starting Point" // Optional: Title shown on tap
-        description="This is the starting center point." // Optional: Description shown on tap
-      />
-    </MapView>
+    <View style={styles.container}>
+      <MapView
+        style={StyleSheet.absoluteFillObject}
+        initialRegion={initialRegion}
+      >
+        <Marker
+          coordinate={{
+            latitude: latitude,
+            longitude: longitude,
+          }}
+          title="Starting Point" // Optional: Title shown on tap
+          description="This is the starting center point." // Optional: Description shown on tap
+        />
+      </MapView>
+
+      {/* buttons to navigate back to the scanner or Car page */}
+      <TouchableOpacity style={styles.mapViewButton} onPress={()=> navigation.navigate('Tabs', { screen: 'Cars', params: {carId}})}>
+          <Text style={styles.mapViewButtonText}>Car View</Text>
+      </TouchableOpacity>
+      
+    </View>
   );
 };
 
@@ -462,6 +500,7 @@ const App = () => {
         <Stack.Screen name="Maps" component={MapsScreen} options={{headerShown: false}} />
         <Stack.Screen name="Login" component={LoginScreen} options = {{headerShown: false}}/>
         <Stack.Screen name="SignUp" component={SignUpScreen} options = {{headerShown: false}}/>
+        <Stack.Screen name="Settings" component={SettingsScreen} options = {{headerShown: false}}/>
       </Stack.Navigator>
 
     </NavigationContainer>
@@ -805,6 +844,131 @@ const styles = StyleSheet.create({
     right: 0,
     left: 0,
     alignSelf: 'center',
+  },
+  carButtonContainer: {
+    flexDirection: 'row', // Align items in a row
+    justifyContent: 'space-evenly', // Space between the buttons
+    alignItems: 'center',
+    paddingTop:5,
+    paddingBottom: 15,
+    backgroundColor: 'white'
+  },
+  carInfoButton: {
+    flex: 1, // Equal button widths
+    backgroundColor: '#3c4660',
+    paddingVertical: 15, // Vertical padding
+    borderRadius: 0, // Rounded corners
+    alignItems: 'center', // Center text horizontally
+  },
+  carDamagesButton: {
+    flex: 1, // Equal button widths
+    backgroundColor: '#687bb1',
+    paddingVertical: 15, // Vertical padding
+    borderRadius: 0, // Rounded corners
+    alignItems: 'center', // Center text horizontally
+  },
+  carInfoButtonText: {
+    color: 'white',
+    fontSize: 18,
+  },
+  carViewContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  carImageContainer: {
+    flex: 1,
+    backgroundColor: 'white',
+  },
+  mapViewButton:{
+    position: 'absolute', // Equal button widths
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#3c4660',
+    height: '7%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapViewButtonText:{
+    fontSize: 18,
+    color: 'white',
+    alignSelf: 'center',
+  },
+  carInfoContainer: {
+    flexDirection: 'row',
+    backgroundColor: 'white',
+    height: '30%',
+    marginHorizontal: 5,
+  },
+  leftColumn: {
+    borderColor: 'black',
+    borderWidth: 0.5,
+    width: '40%',
+  },
+  rightColumn: {
+    borderColor: 'black',
+    borderWidth: 0.5,
+    width: '60%',
+  },
+  carInfoText: {
+    flex: 1,
+    flexDirection: 'column',
+    color: 'black',
+    fontSize: 16,
+    marginVertical: 4,
+    marginLeft: 7,
+  },
+  loadingMsg: {
+    position: 'absolute',
+    top: '50%',
+    left: '40%',
+    fontSize: 20,
+  },
+  profileScreen: {
+    flex: 1,
+    backgroundColor: "#f4f4f4",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  profileContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 15,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  info: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 5,
+  },
+  settingsButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  settingsButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });
 
