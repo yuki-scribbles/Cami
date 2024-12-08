@@ -424,8 +424,8 @@ const MapsScreen = ({ route }) => {
   const initialRegion = {
     latitude: latitude,         // Center latitude
     longitude: longitude,       // Center longitude
-    latitudeDelta: 0.0922,      // Vertical span in degrees (~10 km)
-    longitudeDelta: 0.0421,     // Horizontal span in degrees (~5 km)
+    latitudeDelta: 0.002,      // Vertical span in degrees (~10 km)
+    longitudeDelta: 0.001,     // Horizontal span in degrees (~5 km)
   };
 
   return (
