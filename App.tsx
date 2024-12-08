@@ -3,7 +3,7 @@ import React from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
 import { Button, StyleSheet, Text, TextInput, TouchableOpacity, View, Switch, Alert, Modal, Image, ScrollView, Dimensions} from 'react-native';
-import { NavigationContainer, useNavigation } from '@react-navigation/native';
+import { NavigationContainer, useNavigation, RouteProp } from '@react-navigation/native';
 import { Picker } from '@react-native-picker/picker'
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, GestureHandlerRootView } from 'react-native-gesture-handler';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
@@ -11,7 +11,8 @@ import MapView, {Marker} from 'react-native-maps';
 import { FontAwesome } from '@expo/vector-icons';
 import Carousel from 'react-native-reanimated-carousel';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { createStackNavigator } from '@react-navigation/stack';
+import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+
 
 // These are for Firebase Authentication
 import { initializeApp,} from 'firebase/app';
@@ -45,9 +46,13 @@ type RootTabParamList = {
   Scan: undefined;
   Profile: undefined;
   Cars: {carId: any};
+};
+
+type RootStackParamList = {
   Maps: {latitude: Number, longitude: Number};
   Login: undefined;
   SignUp: undefined;
+  Settings: undefined;
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -180,11 +185,36 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
   );
 }
 
-// Profile Screen
-const ProfileScreen = () => {
+const SettingsScreen = () => {
   return (
     <View style={styles.screen}>
-      <Text style={styles.text}>Profile Screen</Text>
+      <Text style={styles.text}>Settings Screen</Text>
+    </View>
+  );
+};
+
+type ProfileScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Settings'>;
+type ProfileScreenProps = {
+  navigation: ProfileScreenNavigationProp;
+};
+// Profile Screen
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation })=> {
+
+  return (
+    <View style={styles.profileScreen}>
+      <View style={styles.profileContainer}>
+        <Image
+          source={{ uri: "https://via.placeholder.com/100" }}
+          style={styles.profileImage}
+        />
+        <Text style={styles.name}>John Doe</Text>
+        <Text style={styles.info}>Email: johndoe@example.com</Text>
+        <Text style={styles.info}>Role: Manager</Text>
+        <Text style={styles.info}>Location: Los Angeles, CA</Text>
+      </View>
+      <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
+        <Text style={styles.settingsButtonText}>Go to Settings</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -471,6 +501,7 @@ const App = () => {
         <Stack.Screen name="Maps" component={MapsScreen} options={{headerShown: false}} />
         <Stack.Screen name="Login" component={LoginScreen} options = {{headerShown: false}}/>
         <Stack.Screen name="SignUp" component={SignUpScreen} options = {{headerShown: false}}/>
+        <Stack.Screen name="Settings" component={SettingsScreen} options = {{headerShown: false}}/>
       </Stack.Navigator>
     </NavigationContainer>
   );
@@ -844,7 +875,54 @@ const styles = StyleSheet.create({
     top: '50%',
     left: '40%',
     fontSize: 20,
-  }
+  },
+  profileScreen: {
+    flex: 1,
+    backgroundColor: "#f4f4f4",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  profileContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 15,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  info: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 5,
+  },
+  settingsButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  settingsButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
 });
 
 export default App;
