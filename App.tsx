@@ -494,7 +494,7 @@ function MyTabs() {
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Tabs">
+      <Stack.Navigator initialRouteName="Login">
         {/* Tab Navigator is now a screen inside the Stack Navigator */}
         <Stack.Screen name="Tabs" component={MyTabs} options={{headerShown: false}} />
         {/* Additional Stack Screens */}
