@@ -109,16 +109,7 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
       return;
     }
     setScanned(true); // Set scanned to true immediately after a successful scan
-    Alert.alert(
-      "Scanned Data",
-      `Data: ${data}, Type: ${type}`,
-      [
-        {
-          text: "Go to Cars",
-          onPress: () => navigation.navigate('Cars'),
-        },
-      ]
-    );
+    navigation.navigate('Cars', {carId: data}) // throws a fit here, but it still works :/
   };
 
   return (
@@ -200,7 +191,7 @@ const ProfileScreen = () => {
 
 // Car View Screen
 const CarScreen = ({navigation, route}) => {
-  const carId = 'TY1234'; // when this is switched to be called by another page, this needs to be changed to route.params
+  const {carId} = route.params; // when this is switched to be called by another page, this needs to be changed to route.params
   const [carData, setCarData] = useState(null);
   const [carDamages, setCarDamages] = useState(null);
   const [isDetails, setIsDetails] = useState(true);
