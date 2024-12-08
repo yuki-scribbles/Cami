@@ -1,4 +1,3 @@
-// App.tsx
 import React from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import { useState, useRef, useEffect } from 'react';
@@ -199,7 +198,6 @@ type ProfileScreenProps = {
 };
 // Profile Screen
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation })=> {
-
   return (
     <View style={styles.profileScreen}>
       <View style={styles.profileContainer}>
@@ -494,6 +492,7 @@ function MyTabs() {
 const App = () => {
   return (
     <NavigationContainer>
+
       <Stack.Navigator initialRouteName="Login">
         {/* Tab Navigator is now a screen inside the Stack Navigator */}
         <Stack.Screen name="Tabs" component={MyTabs} options={{headerShown: false}} />
@@ -503,6 +502,7 @@ const App = () => {
         <Stack.Screen name="SignUp" component={SignUpScreen} options = {{headerShown: false}}/>
         <Stack.Screen name="Settings" component={SettingsScreen} options = {{headerShown: false}}/>
       </Stack.Navigator>
+
     </NavigationContainer>
   );
 };
@@ -714,6 +714,53 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 20,
     textAlign: 'center',
+  },
+  profileScreen: {
+    flex: 1,
+    backgroundColor: "#f4f4f4",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 20,
+  },
+  profileContainer: {
+    alignItems: "center",
+    marginBottom: 40,
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 15,
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  info: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 5,
+  },
+  settingsButton: {
+    backgroundColor: "#007bff",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  settingsButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
   },
   Logincontainer: {
     flex: 1,
