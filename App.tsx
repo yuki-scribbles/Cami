@@ -226,6 +226,32 @@ type ProfileScreenProps = {
 };
 // Profile Screen
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation })=> {
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch user data
+  const fetchUserData = async () => {
+    try {
+      onAuthStateChanged(auth, (user) => {
+        if (user){
+          setUserData(user);
+        }
+        else{
+          alert("User is not signed in!");
+        }
+      })
+      
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUserData();
+  }, []);
+
   return (
     <View style={styles.profileScreen}>
       <View style={styles.profileContainer}>
@@ -233,10 +259,16 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation })=> {
           source={{ uri: "https://via.placeholder.com/100" }}
           style={styles.profileImage}
         />
+        { !userData ? (
+        <Text style={styles.info}>No user data available</Text>
+        ) : (
+        <>
         <Text style={styles.name}>John Doe</Text>
-        <Text style={styles.info}>Email: johndoe@example.com</Text>
+        <Text style={styles.info}>Email: {userData.email}</Text>
         <Text style={styles.info}>Role: Manager</Text>
         <Text style={styles.info}>Location: Los Angeles, CA</Text>
+        </>
+        )};
       </View>
       <TouchableOpacity style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
         <Text style={styles.settingsButtonText}>Go to Settings</Text>
@@ -570,7 +602,7 @@ const App = () => {
   return (
     <NavigationContainer>
 
-      <Stack.Navigator initialRouteName="Tabs">
+      <Stack.Navigator initialRouteName="Login">
         {/* Tab Navigator is now a screen inside the Stack Navigator */}
         <Stack.Screen name="Tabs" component={MyTabs} options={{headerShown: false}} />
         {/* Additional Stack Screens */}
