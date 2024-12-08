@@ -11,6 +11,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import Carousel from 'react-native-reanimated-carousel';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+import Slider from '@react-native-community/slider';
 
 
 // These are for Firebase Authentication
@@ -185,9 +186,35 @@ const ScanScreen: React.FC<ScanScreenProps> = ({ navigation }) => {
 }
 
 const SettingsScreen = () => {
+  const [isEnabled, setIsEnabled] = useState(false);
+  const toggleSwitch = () => setIsEnabled(previousState => !previousState);
   return (
     <View style={styles.screen}>
-      <Text style={styles.text}>Settings Screen</Text>
+      <Text style={styles.text}>Settings</Text>
+      <View style = {styles.settingDiv}>
+        <View style = {styles.settingSubdiv}>
+          <Text style ={styles.settingText}>Dark Mode</Text>
+        </View>
+        <View style = {styles.settingSubdiv}>
+          <Switch
+          onValueChange={toggleSwitch}
+          value = {isEnabled}
+          style = {styles.settingItem}
+          />
+        </View>
+      </View>
+
+      <View style = {styles.settingDiv}>
+        <View style = {styles.settingSubdiv}>  
+          <Text style = {styles.settingText}>Text Size</Text>
+        </View>
+        <View style = {styles.settingSubdiv}>
+          <Slider
+            minimumValue={0}
+            maximumValue={10}
+          />
+        </View>
+      </View>
     </View>
   );
 };
@@ -923,6 +950,28 @@ const styles = StyleSheet.create({
     left: '40%',
     fontSize: 20,
   },
+  settingDiv:{
+    flexDirection:'row',
+    width:"100%",
+    paddingLeft:"10%",
+    paddingRight:"10%",
+    margin:10
+    // backgroundColor:"#000"
+  },
+  settingSubdiv:{
+    flex:1,
+    // height:100,
+    // backgroundColor:'#000',
+  },
+  settingText:{
+    fontSize: 15,
+    color: '#000',
+    textAlign:'left',
+    margin: 10,
+  },
+  settingItem:{
+    alignSelf:'center',
+  }
 });
 
 export default App;
