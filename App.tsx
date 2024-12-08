@@ -16,7 +16,7 @@ import Slider from '@react-native-community/slider';
 
 // These are for Firebase Authentication
 import { initializeApp,} from 'firebase/app';
-import { getDatabase, ref, child, get} from 'firebase/database';
+import { getDatabase, ref, child, get, onValue} from 'firebase/database';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile } from 'firebase/auth';
 import { red } from 'react-native-reanimated/lib/typescript/Colors';
 
@@ -45,7 +45,7 @@ const { width: screenWidth } = Dimensions.get('window');
 type RootTabParamList = {
   Scan: undefined;
   Profile: undefined;
-  Cars: {carId: any};
+  Cars: undefined;
 };
 
 type RootStackParamList = {
@@ -53,6 +53,7 @@ type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
   Settings: undefined;
+  Details: {carId: any};
 };
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
@@ -244,6 +245,51 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ navigation })=> {
   );
 };
 
+interface CarOverview {
+  id: string,
+  model: string,
+  year: number,
+}
+
+const InventoryScreen = ({navigation}) => {
+  const [items, setItems] = useState<CarOverview[]>([]);
+
+  useEffect(() => {
+    const dbRef = ref(db, '/Cars'); // Replace '/items' with your database path
+
+    const fetchData = async () => {
+      onValue(dbRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          const formattedData: CarOverview[] = Object.keys(data).map((key) => ({
+            id: key,
+            ...data[key],
+          }));
+          setItems(formattedData);
+        } else {
+          setItems([]);
+        }
+      });
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <View style={styles.carsContainer}>
+      <Text style={styles.carOverviewLabel}> Car Inventory </Text>
+      {items.map((item) => (
+        <View key={item.id} style={styles.carsContainer}>
+          <TouchableOpacity style={styles.carOverviewButton} onPress={()=> navigation.navigate('Details', {carId: item.id})}>
+              <Image source={require('./assets/car.webp')} style={styles.carOverviewImg}></Image>
+              <Text style={styles.carOverview}>{item.year} {item.model}</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+    </View>
+  );
+}
+
 // Car View Screen
 const CarScreen = ({navigation, route}) => {
   const {carId} = route.params; // when this is switched to be called by another page, this needs to be changed to route.params
@@ -353,6 +399,10 @@ const CarScreen = ({navigation, route}) => {
           <TouchableOpacity style={styles.mapViewButton} onPress={()=>navigation.navigate('Maps', { latitude: carData.latitude, longitude: carData.longitude, carId: carId })}>
             <Text style={styles.mapViewButtonText}>Map View</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity style={styles.mapNavBtn} onPress={()=>navigation.navigate('Tabs', {screen: 'Cars'})}>
+            <Text style={styles.mapViewButtonText}>Return</Text>
+          </TouchableOpacity>
         </>
         ) : (
           <Text style={styles.loadingMsg}>Loading...</Text>
@@ -395,7 +445,7 @@ const MapsScreen = ({ route }) => {
       </MapView>
 
       {/* buttons to navigate back to the scanner or Car page */}
-      <TouchableOpacity style={styles.mapViewButton} onPress={()=> navigation.navigate('Tabs', { screen: 'Cars', params: {carId}})}>
+      <TouchableOpacity style={styles.mapNavBtn} onPress={()=> navigation.navigate('Details', {carId})}>
           <Text style={styles.mapViewButtonText}>Car View</Text>
       </TouchableOpacity>
       
@@ -510,7 +560,7 @@ function MyTabs() {
   >
     <Tab.Screen name="Profile" component={ProfileScreen} />
     <Tab.Screen name="Scan" component={ScanScreen} />
-    <Tab.Screen name="Cars" component={CarScreen} />
+    <Tab.Screen name="Cars" component={InventoryScreen} />
     </Tab.Navigator>
   );
 }
@@ -520,7 +570,7 @@ const App = () => {
   return (
     <NavigationContainer>
 
-      <Stack.Navigator initialRouteName="Login">
+      <Stack.Navigator initialRouteName="Tabs">
         {/* Tab Navigator is now a screen inside the Stack Navigator */}
         <Stack.Screen name="Tabs" component={MyTabs} options={{headerShown: false}} />
         {/* Additional Stack Screens */}
@@ -528,6 +578,7 @@ const App = () => {
         <Stack.Screen name="Login" component={LoginScreen} options = {{headerShown: false}}/>
         <Stack.Screen name="SignUp" component={SignUpScreen} options = {{headerShown: false}}/>
         <Stack.Screen name="Settings" component={SettingsScreen} options = {{headerShown: false}}/>
+        <Stack.Screen name="Details" component={CarScreen} options = {{headerShown: false}}/>
       </Stack.Navigator>
 
     </NavigationContainer>
@@ -907,9 +958,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   mapViewButton:{
-    position: 'absolute', // Equal button widths
-    bottom: 0,
     width: '100%',
+    marginTop: 12,
     backgroundColor: '#3c4660',
     height: '7%',
     alignItems: 'center',
@@ -971,7 +1021,46 @@ const styles = StyleSheet.create({
   },
   settingItem:{
     alignSelf:'center',
-  }
+  },
+  carsContainer:{
+    flex: 1,
+    backgroundColor: 'white'
+  },
+  carOverviewLabel: {
+    color: 'black',
+    fontSize: 24,
+    alignSelf: 'center',
+    marginTop: 35,
+    marginBottom: 15,
+    marginLeft: 0,
+  },
+  carOverviewButton: {
+    width: '100%',
+    backgroundColor: '#3c4660',
+    alignItems: 'center',
+    justifyContent: 'flex-start',
+    flexDirection: 'row',
+  },
+  carOverviewImg: {
+    height: 60,
+    width: 60,
+    left: 0,
+    marginHorizontal: 15,
+  },
+  carOverview: {
+    marginLeft: 25,
+    color: 'white',
+    fontSize: 20,
+  },
+  mapNavBtn: {
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
+    backgroundColor: '#3c4660',
+    height: '7%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });
 
 export default App;
