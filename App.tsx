@@ -923,25 +923,6 @@ const styles = StyleSheet.create({
     left: '40%',
     fontSize: 20,
   },
-  profileScreen: {
-    flex: 1,
-    backgroundColor: "#f4f4f4",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
-  },
-  profileContainer: {
-    alignItems: "center",
-    marginBottom: 40,
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    elevation: 5,
-  },
 });
 
 export default App;
