@@ -295,7 +295,7 @@ const CarScreen = ({navigation, route}) => {
           </View>
 
           {/* Map View Button */}
-          <TouchableOpacity style={styles.mapViewButton} onPress={()=>navigation.navigate('Maps', { latitude: carData.latitude, longitude: carData.longitude })}>
+          <TouchableOpacity style={styles.mapViewButton} onPress={()=>navigation.navigate('Maps', { latitude: carData.latitude, longitude: carData.longitude, carId: carId })}>
             <Text style={styles.mapViewButtonText}>Map View</Text>
           </TouchableOpacity>
         </>
@@ -312,7 +312,10 @@ const CarScreen = ({navigation, route}) => {
 
 // Maps Screen
 const MapsScreen = ({ route }) => {
-  const {latitude, longitude} = route.params;
+  const {latitude, longitude, carId} = route.params;
+
+  const navigation = useNavigation();
+
   const initialRegion = {
     latitude: latitude,         // Center latitude
     longitude: longitude,       // Center longitude
@@ -321,20 +324,27 @@ const MapsScreen = ({ route }) => {
   };
 
   return (
-    <MapView
-      style={StyleSheet.absoluteFillObject}
-      initialRegion={initialRegion}
-    >
-      {/* Add Marker */}
-      <Marker
-        coordinate={{
-          latitude: latitude,
-          longitude: longitude,
-        }}
-        title="Starting Point" // Optional: Title shown on tap
-        description="This is the starting center point." // Optional: Description shown on tap
-      />
-    </MapView>
+    <View style={styles.container}>
+      <MapView
+        style={StyleSheet.absoluteFillObject}
+        initialRegion={initialRegion}
+      >
+        <Marker
+          coordinate={{
+            latitude: latitude,
+            longitude: longitude,
+          }}
+          title="Starting Point" // Optional: Title shown on tap
+          description="This is the starting center point." // Optional: Description shown on tap
+        />
+      </MapView>
+
+      {/* buttons to navigate back to the scanner or Car page */}
+      <TouchableOpacity style={styles.mapViewButton} onPress={()=> navigation.navigate('Tabs', { screen: 'Cars', params: {carId}})}>
+          <Text style={styles.mapViewButtonText}>Car View</Text>
+      </TouchableOpacity>
+      
+    </View>
   );
 };
 
